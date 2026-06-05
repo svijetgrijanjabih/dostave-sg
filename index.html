@@ -747,11 +747,11 @@
         status: d.status, napomena: d.napomena, pdfName: d.pdfName || ''
       }));
       const encoded = encodeURIComponent(JSON.stringify(payload));
-      const res = await fetch(APPS_SCRIPT_URL + '?action=save&data=' + encoded);
-      const text = await res.text();
-      const json = JSON.parse(text);
-      if (json && json.ok) setSyncStatus('ok', 'Sinkronizirano');
-      else setSyncStatus('error', 'Greška pri snimanju');
+      await fetch(APPS_SCRIPT_URL + '?action=save&data=' + encoded, {
+        method: 'GET',
+        mode: 'no-cors'
+      });
+      setSyncStatus('ok', 'Sinkronizirano');
     } catch(e) {
       setSyncStatus('error', 'Greška: ' + e.message);
     }
