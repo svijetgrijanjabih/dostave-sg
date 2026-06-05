@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dostave — Svijet Grijanja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #161616;
+    --bg3: #1e1e1e;
+    --bg4: #262626;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0ede8;
+    --text2: #8a8680;
+    --text3: #5a5856;
+    --accent: #e85d2f;
+    --accent2: #f07d55;
+    --accent-bg: rgba(232,93,47,0.1);
+    --accent-border: rgba(232,93,47,0.25);
+    --blue: #4a9eff;
+    --blue-bg: rgba(74,158,255,0.1);
+    --green: #4caf7d;
+    --green-bg: rgba(76,175,125,0.1);
+    --amber: #e8a225;
+    --amber-bg: rgba(232,162,37,0.1);
+    --red: #e85d5d;
+    --red-bg: rgba(232,93,93,0.1);
+    --radius: 10px;
+    --radius-lg: 14px;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── LAYOUT ── */
+  .layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .logo-icon svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .logo-text { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .logo-sub { font-size: 11px; color: var(--text3); font-weight: 400; }
+
+  .nav { padding: 12px 10px; flex: 1; }
+
+  .nav-label {
+    font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 12px 10px 6px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    color: var(--text2); font-size: 13px; font-weight: 400;
+    transition: background 0.15s, color 0.15s;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--accent-bg); color: var(--accent2); }
+  .nav-item.active svg { stroke: var(--accent2); }
+
+  .nav-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  .nav-badge { margin-left: auto; font-family: var(--mono); font-size: 11px; background: var(--bg4); color: var(--text2); padding: 1px 7px; border-radius: 20px; }
+  .nav-badge.accent { background: var(--accent-bg); color: var(--accent); }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 11px; color: var(--text3);
+  }
+
+  /* ── MAIN ── */
+  .main { overflow: auto; }
+
+  .topbar {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 10;
+  }
+
+  .page-title { font-size: 17px; font-weight: 500; color: var(--text); }
+  .page-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; font-family: var(--sans); transition: all 0.15s;
+  }
+
+  .btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: var(--bg3); color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--bg4); color: var(--text); }
+  .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(232,93,93,0.2); }
+  .btn-danger:hover { background: rgba(232,93,93,0.18); }
+  .btn-sm { padding: 6px 11px; font-size: 12px; }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 1px; background: var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-cell {
+    background: var(--bg); padding: 16px 20px;
+  }
+
+  .stat-cell-label { font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: 0.03em; margin-bottom: 6px; }
+  .stat-cell-val { font-size: 24px; font-weight: 300; color: var(--text); font-family: var(--mono); }
+  .stat-cell-val.blue { color: var(--blue); }
+  .stat-cell-val.amber { color: var(--amber); }
+  .stat-cell-val.green { color: var(--green); }
+  .stat-cell-val.accent { color: var(--accent); }
+
+  /* ── CONTENT ── */
+  .content { padding: 24px 28px; }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+
+  .search-wrap { position: relative; flex: 1; min-width: 160px; max-width: 260px; }
+  .search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .search-wrap input { width: 100%; background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px; padding: 8px 12px 8px 32px; color: var(--text); font-family: var(--sans); font-size: 13px; }
+  .search-wrap input:focus { outline: none; border-color: var(--accent); }
+  .search-wrap input::placeholder { color: var(--text3); }
+
+  select.filter-sel {
+    background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px;
+    padding: 8px 12px; color: var(--text2); font-family: var(--sans); font-size: 13px;
+    cursor: pointer;
+  }
+
+  select.filter-sel:focus { outline: none; border-color: var(--accent); }
+
+  input[type="date"].filter-date {
+    background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px;
+    padding: 8px 12px; color: var(--text2); font-family: var(--sans); font-size: 13px;
+    color-scheme: dark;
+  }
+
+  input[type="date"].filter-date:focus { outline: none; border-color: var(--accent); }
+
+  .clear-btn { font-size: 12px; color: var(--text3); background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+  .clear-btn:hover { color: var(--text2); background: var(--bg3); }
+
+  /* ── VIEW TOGGLE ── */
+  .view-toggle { display: flex; background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px; overflow: hidden; margin-left: auto; }
+  .view-btn { padding: 7px 12px; border: none; background: none; cursor: pointer; display: flex; align-items: center; }
+  .view-btn svg { width: 15px; height: 15px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .view-btn.active { background: var(--bg4); }
+  .view-btn.active svg { stroke: var(--text); }
+
+  /* ── DATE GROUP ── */
+  .date-group { margin-bottom: 28px; }
+
+  .date-group-hdr {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .date-group-hdr-label {
+    font-family: var(--mono); font-size: 12px; color: var(--text3); font-weight: 500;
+  }
+
+  .date-group-hdr-day {
+    font-size: 13px; color: var(--text2); font-weight: 400;
+  }
+
+  .date-count {
+    margin-left: auto; font-family: var(--mono); font-size: 11px;
+    background: var(--bg3); color: var(--text3); padding: 2px 8px; border-radius: 20px;
+  }
+
+  /* ── DELIVERY CARD ── */
+  .d-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+  .d-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .d-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 16px;
+    transition: border-color 0.15s, transform 0.1s;
+    cursor: default;
+  }
+
+  .d-card:hover { border-color: var(--border2); }
+
+  .d-card.list-view {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+  }
+
+  .d-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+
+  .d-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .d-contact { font-size: 12px; color: var(--text3); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+  .d-contact svg { width: 12px; height: 12px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+  .d-location { font-size: 12px; color: var(--text2); margin-top: 4px; display: flex; align-items: flex-start; gap: 5px; }
+  .d-location svg { width: 12px; height: 12px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px; }
+
+  .d-product {
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text2);
+    display: flex; gap: 6px; align-items: flex-start;
+  }
+
+  .d-product svg { width: 13px; height: 13px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px; }
+
+  .d-time {
+    display: flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 8px;
+  }
+
+  .d-time svg { width: 12px; height: 12px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .d-note { font-size: 11px; color: var(--text3); margin-top: 6px; font-style: italic; }
+
+  .d-pdf {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--blue); background: var(--blue-bg);
+    border-radius: 6px; padding: 3px 8px; margin-top: 8px;
+  }
+
+  .d-pdf svg { width: 12px; height: 12px; stroke: var(--blue); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .d-actions {
+    display: flex; gap: 6px; margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── BADGE ── */
+  .badge {
+    font-size: 11px; font-weight: 500; padding: 3px 9px;
+    border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+  }
+
+  .badge-novo { background: var(--blue-bg); color: var(--blue); }
+  .badge-utoku { background: var(--amber-bg); color: var(--amber); }
+  .badge-isporuceno { background: var(--green-bg); color: var(--green); }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center; padding: 60px 20px;
+    color: var(--text3); font-size: 13px;
+  }
+
+  .empty-icon {
+    width: 48px; height: 48px;
+    background: var(--bg3); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .empty-icon svg { width: 22px; height: 22px; stroke: var(--text3); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100; padding: 20px; backdrop-filter: blur(4px);
+  }
+
+  .modal {
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 16px; padding: 28px; width: 100%; max-width: 520px;
+    max-height: 92vh; overflow-y: auto;
+    animation: slideUp 0.2s ease;
+  }
+
+  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .modal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .modal-title { font-size: 16px; font-weight: 500; color: var(--text); }
+  .modal-close { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 6px; cursor: pointer; display: flex; align-items: center; }
+  .modal-close:hover { background: var(--bg4); }
+  .modal-close svg { width: 15px; height: 15px; stroke: var(--text2); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .form-section { margin-bottom: 20px; }
+  .form-section-label { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 12px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .form-group:last-child { margin-bottom: 0; }
+
+  .form-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+
+  .form-input, .form-select, .form-textarea {
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 9px 12px;
+    color: var(--text); font-family: var(--sans); font-size: 13px;
+    transition: border-color 0.15s;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--text3); }
+  .form-textarea { min-height: 72px; resize: vertical; }
+  .form-select { cursor: pointer; }
+
+  input[type="date"].form-input, input[type="time"].form-input { color-scheme: dark; }
+
+  .file-drop {
+    border: 1px dashed var(--border2); border-radius: 8px;
+    padding: 16px; text-align: center; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .file-drop:hover { border-color: var(--accent); background: var(--accent-bg); }
+  .file-drop-text { font-size: 12px; color: var(--text3); }
+  .file-drop-text strong { color: var(--text2); }
+  .file-drop input { display: none; }
+
+  .pdf-attached {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--blue-bg); border: 1px solid rgba(74,158,255,0.2);
+    border-radius: 8px; padding: 10px 12px;
+  }
+
+  .pdf-attached svg { width: 16px; height: 16px; stroke: var(--blue); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .pdf-attached-name { font-size: 12px; color: var(--blue); flex: 1; }
+  .pdf-remove { background: none; border: none; cursor: pointer; color: var(--text3); padding: 2px; border-radius: 4px; }
+  .pdf-remove:hover { color: var(--red); }
+  .pdf-remove svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .form-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  .form-error { font-size: 12px; color: var(--red); margin-top: 12px; padding: 10px 12px; background: var(--red-bg); border-radius: 8px; }
+
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+  /* ── CONFIRM DIALOG ── */
+  .confirm-modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 14px; padding: 24px; width: 100%; max-width: 360px; animation: slideUp 0.15s ease; }
+  .confirm-title { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+  .confirm-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; }
+  .confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+
+  /* ── RESPONSIVE ── */
+  .hamburger {
+    display: none; background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 7px 9px; cursor: pointer; align-items: center; justify-content: center;
+  }
+  .hamburger svg { width: 18px; height: 18px; stroke: var(--text2); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 40; backdrop-filter: blur(2px);
+  }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .hamburger { display: flex; }
+    .sidebar {
+      position: fixed; left: -240px; top: 0; height: 100vh;
+      width: 220px; z-index: 50;
+      transition: left 0.25s ease;
+    }
+    .sidebar.open { left: 0; }
+    .sidebar-overlay.open { display: block; }
+    .stats-bar { grid-template-columns: repeat(3, 1fr); }
+    .topbar { padding: 14px 16px; gap: 8px; }
+    .content { padding: 16px; }
+    .d-grid { grid-template-columns: 1fr; }
+    .topbar-actions .btn span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div>
+          <div class="logo-text">Svijet Grijanja</div>
+          <div class="logo-sub">Dostave & Termini</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-label">Prikaz</div>
+      <button class="nav-item active" onclick="switchView('lista', this)">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Sve dostave
+        <span class="nav-badge" id="nb-total">0</span>
+      </button>
+      <button class="nav-item" onclick="switchView('kalendar', this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Po datumu
+        <span class="nav-badge" id="nb-today">0</span>
+      </button>
+
+      <div class="nav-label" style="margin-top: 8px;">Status</div>
+      <button class="nav-item" onclick="filterByStatus('Novo', this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Novo
+        <span class="nav-badge accent" id="nb-novo">0</span>
+      </button>
+      <button class="nav-item" onclick="filterByStatus('U toku', this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        U toku
+        <span class="nav-badge" id="nb-utoku">0</span>
+      </button>
+      <button class="nav-item" onclick="filterByStatus('Isporučeno', this)">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Isporučeno
+        <span class="nav-badge" id="nb-done">0</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      v1.0 · Podaci u browseru
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Otvori meni">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="page-title" id="page-title">Sve dostave</div>
+        <div class="page-sub" id="page-sub">Upravljanje i pregled svih termina</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;margin-right:auto;margin-left:16px">
+        <span id="sync-indicator" style="font-size:12px;color:var(--text3)">↻ Učitavanje...</span>
+        <button onclick="loadFromSheet()" title="Ručna sinkronizacija" style="background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;font-size:14px;line-height:1" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text3)'">↺</button>
+      </div>
+      <div class="topbar-actions">
+        <label class="btn btn-ghost btn-sm" style="cursor:pointer" title="Import CSV">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Import CSV
+          <input type="file" id="csv-import-input" accept=".csv" style="display:none" onchange="importCSV(event)" />
+        </label>
+        <button class="btn btn-ghost btn-sm" onclick="exportCSV()">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export CSV
+        </button>
+        <button class="btn btn-primary" onclick="openModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nova dostava
+        </button>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-cell"><div class="stat-cell-label">Ukupno</div><div class="stat-cell-val" id="s-total">0</div></div>
+      <div class="stat-cell"><div class="stat-cell-label">Novo</div><div class="stat-cell-val blue" id="s-novo">0</div></div>
+      <div class="stat-cell"><div class="stat-cell-label">U toku</div><div class="stat-cell-val amber" id="s-utoku">0</div></div>
+      <div class="stat-cell"><div class="stat-cell-label">Isporučeno</div><div class="stat-cell-val green" id="s-done">0</div></div>
+      <div class="stat-cell"><div class="stat-cell-label">Danas</div><div class="stat-cell-val accent" id="s-danas">0</div></div>
+    </div>
+
+div>
+
+    <div class="content">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search" placeholder="Pretraži kupce, adresi..." oninput="render()" />
+        </div>
+        <select class="filter-sel" id="filter-status" onchange="render()">
+          <option value="">Svi statusi</option>
+          <option>Novo</option>
+          <option>U toku</option>
+          <option>Isporučeno</option>
+        </select>
+        <input type="date" class="filter-date" id="filter-date" onchange="render()" title="Filter po datumu" />
+        <button class="clear-btn" onclick="clearFilters()">Resetuj</button>
+        <div class="view-toggle" style="margin-left:auto">
+          <button class="view-btn active" id="vb-grid" onclick="setCardView('grid')" title="Kartice">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </button>
+          <button class="view-btn" id="vb-list" onclick="setCardView('list')" title="Lista">
+            <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="main-content"></div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" style="display:none" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">Nova dostava</div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-label">Kupac</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ime i prezime *</label>
+          <input type="text" class="form-input" id="f-ime" placeholder="Npr. Marko Marković" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefon</label>
+          <input type="tel" class="form-input" id="f-tel" placeholder="+387 61 ..." />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adresa dostave *</label>
+        <input type="text" class="form-input" id="f-adresa" placeholder="Ulica i broj, grad" />
+      </div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <div class="form-section">
+      <div class="form-section-label">Proizvod</div>
+      <div class="form-group">
+        <label class="form-label">Opis proizvoda i količina</label>
+        <textarea class="form-textarea" id="f-proizvod" placeholder="Nordflam ETNA 12kW × 1 kom&#10;DARCO kapu za dimnjak × 2 kom&#10;..."></textarea>
+      </div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <div class="form-section">
+      <div class="form-section-label">Termin</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Datum dostave *</label>
+          <input type="date" class="form-input" id="f-datum" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sat (termin)</label>
+          <input type="time" class="form-input" id="f-termin" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="f-status">
+          <option>Novo</option>
+          <option>U toku</option>
+          <option>Isporučeno</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="form-divider" />
+
+    <div class="form-section">
+      <div class="form-section-label">Napomene i dokumenti</div>
+      <div class="form-group">
+        <label class="form-label">Napomena</label>
+        <textarea class="form-textarea" id="f-napomena" placeholder="Broj predračuna, instrukcije za dostavljača..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">PDF predračun</label>
+        <div id="pdf-area">
+          <label class="file-drop" for="f-pdf-input">
+            <div class="file-drop-text">
+              <svg style="width:20px;height:20px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <strong>Klikni za upload</strong> ili prevuci PDF
+            </div>
+            <input type="file" id="f-pdf-input" accept=".pdf" onchange="handlePDF(event)" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-error" id="form-error" style="display:none"></div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Odustani</button>
+      <button class="btn btn-primary" onclick="saveDelivery()">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Spremi dostavu
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="modal-overlay" id="confirm-overlay" style="display:none">
+  <div class="confirm-modal">
+    <div class="confirm-title">Obriši dostavu?</div>
+    <div class="confirm-sub" id="confirm-text">Ova radnja se ne može poništiti.</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeConfirm()">Odustani</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete()">Obriši</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let deliveries = JSON.parse(localStorage.getItem('sg_dostave_v2') || '[]');
+  let editId = null;
+  let pdfData = null;
+  let deleteId = null;
+  let currentView = 'lista';
+  let cardView = 'grid';
+  let statusFilter = '';
+  let syncStatus = 'idle'; // idle | syncing | ok | error
+  let syncTimeout = null;
+
+  const SVG = {
+    phone: `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.41 2 2 0 0 1 3.61 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.1 6.1l1.06-1.06a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+    pin: `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    pkg: `<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
+    clock: `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    pdf: `<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+    edit: `<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    trash: `<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+    refresh: `<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`
+  };
+
+  function save() {
+    localStorage.setItem('sg_dostave_v2', JSON.stringify(deliveries));
+    scheduleSyncToSheet();
+  }
+
+  function setSyncStatus(s, msg) {
+    syncStatus = s;
+    const el = document.getElementById('sync-indicator');
+    if (!el) return;
+    const icons = { syncing: '↻', ok: '✓', error: '⚠' };
+    const colors = { syncing: '#e8a225', ok: '#4caf7d', error: '#e85d5d' };
+    el.textContent = icons[s] + ' ' + msg;
+    el.style.color = colors[s];
+  }
+
+  function scheduleSyncToSheet() {
+    clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(syncToSheet, 1200);
+  }
+
+  function syncToSheet() {
+    setSyncStatus('syncing', 'Sinkronizacija...');
+    const payload = deliveries.map(d => ({
+      id: d.id, ime: d.ime, tel: d.tel, adresa: d.adresa,
+      proizvod: d.proizvod, datum: d.datum, termin: d.termin,
+      status: d.status, napomena: d.napomena, pdfName: d.pdfName || ''
+    }));
+    google.script.run
+      .withSuccessHandler(() => setSyncStatus('ok', 'Sinkronizirano'))
+      .withFailureHandler(e => setSyncStatus('error', 'Greška: ' + e.message))
+      .saveDeliveries(payload);
+  }
+
+  function loadFromSheet() {
+    setSyncStatus('syncing', 'Učitavanje...');
+    google.script.run
+      .withSuccessHandler(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          deliveries = data.filter(r => r.id).map(r => ({
+            id: String(r.id), ime: r.ime||'', tel: r.tel||'',
+            adresa: r.adresa||'', proizvod: r.proizvod||'',
+            datum: r.datum||'', termin: r.termin||'',
+            status: r.status||'Novo', napomena: r.napomena||'',
+            pdfName: r.pdfName||'', pdfData: ''
+          }));
+          localStorage.setItem('sg_dostave_v2', JSON.stringify(deliveries));
+          render();
+          setSyncStatus('ok', 'Sinkronizirano · ' + deliveries.length + ' dostava');
+        } else {
+          render();
+          setSyncStatus('ok', 'Prazna baza');
+        }
+      })
+      .withFailureHandler(e => {
+        render();
+        setSyncStatus('error', 'Greška: ' + e.message);
+      })
+      .getDeliveries();
+  }
+
+  function today() { return new Date().toISOString().slice(0,10); }
+
+  function formatDate(d) {
+    if (!d) return '';
+    const [y,m,day] = d.split('-');
+    return `${day}.${m}.${y}.`;
+  }
+
+  function dayName(d) {
+    const days = ['Nedjelja','Ponedjeljak','Utorak','Srijeda','Četvrtak','Petak','Subota'];
+    return days[new Date(d + 'T12:00:00').getDay()];
+  }
+
+  function badgeHTML(s) {
+    const cls = s === 'Novo' ? 'badge-novo' : s === 'U toku' ? 'badge-utoku' : 'badge-isporuceno';
+    return `<span class="badge ${cls}">${s}</span>`;
+  }
+
+  function nextStatus(s) {
+    return s === 'Novo' ? 'U toku' : s === 'U toku' ? 'Isporučeno' : 'Novo';
+  }
+
+  function getFiltered() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const fs = document.getElementById('filter-status').value || statusFilter;
+    const fd = document.getElementById('filter-date').value;
+    return deliveries.filter(d => {
+      if (q && !`${d.ime} ${d.adresa} ${d.proizvod || ''}`.toLowerCase().includes(q)) return false;
+      if (fs && d.status !== fs) return false;
+      if (fd && d.datum !== fd) return false;
+      return true;
+    }).sort((a,b) => (a.datum||'') > (b.datum||'') ? 1 : -1);
+  }
+
+  function cardHTML(d, listMode) {
+    const cls = listMode ? 'd-card list-view' : 'd-card';
+    if (listMode) {
+      return `<div class="${cls}">
+        <div>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span class="d-name">${d.ime}</span>
+            ${badgeHTML(d.status)}
+            ${d.datum ? `<span style="font-family:var(--mono);font-size:11px;color:var(--text3)">${formatDate(d.datum)}${d.termin?' · '+d.termin+'h':''}</span>` : ''}
+          </div>
+          <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;">
+            ${d.tel ? `<span class="d-contact">${SVG.phone} ${d.tel}</span>` : ''}
+            <span class="d-contact">${SVG.pin} ${d.adresa}</span>
+            ${d.proizvod ? `<span class="d-contact">${SVG.pkg} ${d.proizvod.split('\n')[0]}</span>` : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')" title="Promijeni status">${SVG.refresh}</button>
+          <button class="btn btn-ghost btn-sm" onclick="editDelivery('${d.id}')">${SVG.edit}</button>
+          <button class="btn btn-danger btn-sm" onclick="askDelete('${d.id}')">${SVG.trash}</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="${cls}">
+      <div class="d-card-top">
+        <div>
+          <div class="d-name">${d.ime}</div>
+          ${d.tel ? `<div class="d-contact">${SVG.phone} ${d.tel}</div>` : ''}
+          <div class="d-location">${SVG.pin} ${d.adresa}</div>
+        </div>
+        ${badgeHTML(d.status)}
+      </div>
+      ${d.proizvod ? `<div class="d-product">${SVG.pkg}<span>${d.proizvod.replace(/\n/g,'<br>')}</span></div>` : ''}
+      ${d.datum ? `<div class="d-time">${SVG.clock} ${formatDate(d.datum)}${d.termin ? ' · ' + d.termin + 'h' : ''} · ${dayName(d.datum)}</div>` : ''}
+      ${d.napomena ? `<div class="d-note">— ${d.napomena}</div>` : ''}
+      ${d.pdfName ? `<div class="d-pdf">${SVG.pdf} ${d.pdfName}</div>` : ''}
+      <div class="d-actions">
+        <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')">${SVG.refresh} Status</button>
+        <button class="btn btn-ghost btn-sm" onclick="editDelivery('${d.id}')">${SVG.edit} Uredi</button>
+        <button class="btn btn-danger btn-sm" onclick="askDelete('${d.id}')">${SVG.trash}</button>
+      </div>
+    </div>`;
+  }
+
+  function renderStats() {
+    const total = deliveries.length;
+    const novo = deliveries.filter(d => d.status === 'Novo').length;
+    const utoku = deliveries.filter(d => d.status === 'U toku').length;
+    const done = deliveries.filter(d => d.status === 'Isporučeno').length;
+    const danas = deliveries.filter(d => d.datum === today()).length;
+    document.getElementById('s-total').textContent = total;
+    document.getElementById('s-novo').textContent = novo;
+    document.getElementById('s-utoku').textContent = utoku;
+    document.getElementById('s-done').textContent = done;
+    document.getElementById('s-danas').textContent = danas;
+    document.getElementById('nb-total').textContent = total;
+    document.getElementById('nb-today').textContent = danas;
+    document.getElementById('nb-novo').textContent = novo;
+    document.getElementById('nb-utoku').textContent = utoku;
+    document.getElementById('nb-done').textContent = done;
+  }
+
+  function render() {
+    renderStats();
+    const list = getFiltered();
+    const cont = document.getElementById('main-content');
+    const isListMode = cardView === 'list';
+
+    if (list.length === 0) {
+      cont.innerHTML = `<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>Nema dostava za prikaz.<br>Dodaj novu klikom na "Nova dostava".</div>`;
+      return;
+    }
+
+    if (currentView === 'lista') {
+      const wrapCls = isListMode ? 'd-list' : 'd-grid';
+      cont.innerHTML = `<div class="${wrapCls}">${list.map(d => cardHTML(d, isListMode)).join('')}</div>`;
+    } else {
+      const groups = {};
+      list.forEach(d => {
+        const k = d.datum || '__nodatum__';
+        if (!groups[k]) groups[k] = [];
+        groups[k].push(d);
+      });
+      cont.innerHTML = Object.entries(groups).map(([date, items]) => {
+        const label = date === '__nodatum__' ? 'Bez datuma' : formatDate(date);
+        const sub = date !== '__nodatum__' ? dayName(date) : '';
+        const wrapCls = isListMode ? 'd-list' : 'd-grid';
+        const isToday = date === today();
+        return `<div class="date-group">
+          <div class="date-group-hdr">
+            <span class="date-group-hdr-label">${label}</span>
+            ${sub ? `<span class="date-group-hdr-day">${sub}</span>` : ''}
+            ${isToday ? `<span class="badge badge-novo" style="font-size:10px">Danas</span>` : ''}
+            <span class="date-count">${items.length}</span>
+          </div>
+          <div class="${wrapCls}">${items.map(d => cardHTML(d, isListMode)).join('')}</div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  function switchView(view, el) {
+    currentView = view;
+    statusFilter = '';
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('filter-status').value = '';
+    if (view === 'lista') {
+      document.getElementById('page-title').textContent = 'Sve dostave';
+      document.getElementById('page-sub').textContent = 'Upravljanje i pregled svih termina';
+    } else {
+      document.getElementById('page-title').textContent = 'Po datumu';
+      document.getElementById('page-sub').textContent = 'Termini grupisani po datumu dostave';
+    }
+    render();
+  }
+
+  function filterByStatus(s, el) {
+    statusFilter = s;
+    currentView = 'lista';
+    document.getElementById('filter-status').value = '';
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('page-title').textContent = s;
+    document.getElementById('page-sub').textContent = `Dostave sa statusom "${s}"`;
+    render();
+  }
+
+  function setCardView(v) {
+    cardView = v;
+    document.getElementById('vb-grid').classList.toggle('active', v === 'grid');
+    document.getElementById('vb-list').classList.toggle('active', v === 'list');
+    render();
+  }
+
+  function clearFilters() {
+    document.getElementById('search').value = '';
+    document.getElementById('filter-status').value = '';
+    document.getElementById('filter-date').value = '';
+    statusFilter = '';
+    render();
+  }
+
+  function openModal(id) {
+    editId = id || null;
+    pdfData = null;
+    document.getElementById('form-error').style.display = 'none';
+    resetPDFArea();
+    if (id) {
+      const d = deliveries.find(x => x.id === id);
+      document.getElementById('modal-title').textContent = 'Uredi dostavu';
+      document.getElementById('f-ime').value = d.ime || '';
+      document.getElementById('f-tel').value = d.tel || '';
+      document.getElementById('f-adresa').value = d.adresa || '';
+      document.getElementById('f-proizvod').value = d.proizvod || '';
+      document.getElementById('f-datum').value = d.datum || '';
+      document.getElementById('f-termin').value = d.termin || '';
+      document.getElementById('f-status').value = d.status || 'Novo';
+      document.getElementById('f-napomena').value = d.napomena || '';
+      if (d.pdfName) {
+        pdfData = { name: d.pdfName, data: d.pdfData };
+        showPDFAttached(d.pdfName);
+      }
+    } else {
+      document.getElementById('modal-title').textContent = 'Nova dostava';
+      ['f-ime','f-tel','f-adresa','f-proizvod','f-datum','f-termin','f-napomena'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('f-status').value = 'Novo';
+    }
+    document.getElementById('modal-overlay').style.display = 'flex';
+  }
+
+  function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+  function overlayClick(e) { if (e.target.id === 'modal-overlay') closeModal(); }
+
+  function handlePDF(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      pdfData = { name: file.name, data: ev.target.result };
+      showPDFAttached(file.name);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function showPDFAttached(name) {
+    document.getElementById('pdf-area').innerHTML = `
+      <div class="pdf-attached">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="pdf-attached-name">${name}</span>
+        <button class="pdf-remove" onclick="removePDF()">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+  }
+
+  function removePDF() { pdfData = null; resetPDFArea(); }
+
+  function resetPDFArea() {
+    document.getElementById('pdf-area').innerHTML = `
+      <label class="file-drop" for="f-pdf-input">
+        <div class="file-drop-text">
+          <svg style="width:20px;height:20px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:6px;display:block;margin-left:auto;margin-right:auto;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <strong>Klikni za upload</strong> ili prevuci PDF
+        </div>
+        <input type="file" id="f-pdf-input" accept=".pdf" onchange="handlePDF(event)" />
+      </label>`;
+  }
+
+  function saveDelivery() {
+    const ime = document.getElementById('f-ime').value.trim();
+    const adresa = document.getElementById('f-adresa').value.trim();
+    const datum = document.getElementById('f-datum').value;
+    const err = document.getElementById('form-error');
+    if (!ime || !adresa || !datum) {
+      err.style.display = 'block';
+      err.textContent = 'Ime kupca, adresa i datum dostave su obavezna polja.';
+      return;
+    }
+    err.style.display = 'none';
+    const obj = {
+      id: editId || `sg_${Date.now()}`,
+      ime, adresa, datum,
+      tel: document.getElementById('f-tel').value.trim(),
+      proizvod: document.getElementById('f-proizvod').value.trim(),
+      termin: document.getElementById('f-termin').value,
+      status: document.getElementById('f-status').value,
+      napomena: document.getElementById('f-napomena').value.trim(),
+      pdfName: pdfData ? pdfData.name : '',
+      pdfData: pdfData ? pdfData.data : '',
+    };
+    if (editId) {
+      const i = deliveries.findIndex(x => x.id === editId);
+      deliveries[i] = obj;
+    } else {
+      deliveries.unshift(obj);
+    }
+    save(); render(); closeModal();
+  }
+
+  function editDelivery(id) { openModal(id); }
+
+  function askDelete(id) {
+    deleteId = id;
+    const d = deliveries.find(x => x.id === id);
+    document.getElementById('confirm-text').textContent = `Briši dostavu za "${d.ime}"? Ova radnja se ne može poništiti.`;
+    document.getElementById('confirm-overlay').style.display = 'flex';
+  }
+
+  function closeConfirm() { document.getElementById('confirm-overlay').style.display = 'none'; deleteId = null; }
+
+  function confirmDelete() {
+    deliveries = deliveries.filter(d => d.id !== deleteId);
+    save(); render(); closeConfirm();
+  }
+
+  function changeStatus(id) {
+    const d = deliveries.find(x => x.id === id);
+    d.status = nextStatus(d.status);
+    save(); render();
+  }
+
+  function exportCSV() {
+    if (!deliveries.length) return alert('Nema dostava za export.');
+    const header = ['Ime','Telefon','Adresa','Proizvod','Datum','Termin','Status','Napomena'];
+    const rows = deliveries.map(d => [
+      d.ime, d.tel, d.adresa,
+      (d.proizvod||'').replace(/\n/g,' | '),
+      d.datum ? formatDate(d.datum) : '',
+      d.termin, d.status, d.napomena
+    ].map(v => `"${(v||'').replace(/"/g,'""')}"`));
+    const csv = [header, ...rows].map(r => r.join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' }));
+    a.download = `dostave_${today()}.csv`;
+    a.click();
+  }
+
+  function importCSV(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const text = ev.target.result.replace(/^\uFEFF/, '');
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length < 2) return alert('CSV fajl je prazan ili neispravan.');
+      const headers = parseCSVRow(lines[0]).map(h => h.toLowerCase().trim());
+      const idxOf = name => headers.indexOf(name);
+      const imported = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = parseCSVRow(lines[i]);
+        const get = name => (cols[idxOf(name)] || '').trim();
+        const ime = get('ime');
+        if (!ime) continue;
+        imported.push({
+          id: `sg_imp_${Date.now()}_${i}`,
+          ime, tel: get('telefon'), adresa: get('adresa'),
+          proizvod: get('proizvod'), datum: parseDatum(get('datum')),
+          termin: get('termin'), status: get('status') || 'Novo',
+          napomena: get('napomena'), pdfName: '', pdfData: ''
+        });
+      }
+      if (!imported.length) return alert('Nije pronađena nijedna dostava u CSV fajlu.');
+      const existing = deliveries.length;
+      deliveries = [...deliveries, ...imported];
+      save(); render();
+      document.getElementById('csv-import-input').value = '';
+      alert(`✓ Uvezeno ${imported.length} dostava${existing ? ' (dodano na postojećih ' + existing + ')' : ''}.`);
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  function parseCSVRow(row) {
+    const result = []; let cur = '', inQ = false;
+    for (let i = 0; i < row.length; i++) {
+      const c = row[i];
+      if (c === '"') { inQ = !inQ; continue; }
+      if (c === ',' && !inQ) { result.push(cur); cur = ''; continue; }
+      cur += c;
+    }
+    result.push(cur);
+    return result;
+  }
+
+  function parseDatum(s) {
+    if (!s) return '';
+    const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    return '';
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('open');
+  }
+
+  function closeSidebar() {
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
+
+  // Close sidebar when nav item clicked on mobile
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+
+  loadFromSheet();
+</script>
+</body>
+</html>
