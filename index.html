@@ -881,6 +881,23 @@
     document.getElementById('nb-today').textContent = danas;
   }
 
+
+
+  function attachCardListeners(cont) {
+    cont.querySelectorAll('.card-status-btn').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); changeStatus(btn.dataset.id); });
+    });
+    cont.querySelectorAll('.card-edit-btn').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); editDelivery(btn.dataset.id); });
+    });
+    cont.querySelectorAll('.card-delete-btn').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); askDelete(btn.dataset.id); });
+    });
+    cont.querySelectorAll('.card-pdf-btn').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); openPDF(btn.dataset.id); });
+    });
+  }
+
   function render() {
     renderStats();
     const list = getFiltered();
