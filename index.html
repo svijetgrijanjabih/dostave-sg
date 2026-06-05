@@ -736,25 +736,21 @@
     }
   }
 
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyHjzKTc2baMsXMBpPgTvBeheJs5bZzz8gFWMrthtEZnFV0f9v_WtZGYifcDJqP7gEwg/exec';
+
   async function syncToSheet() {
     setSyncStatus('syncing', 'Sinkronizacija...');
     try {
-      const values = [['id','ime','tel','adresa','proizvod','datum','termin','status','napomena','pdfName']];
-      deliveries.forEach(d => values.push([
-        d.id||'', d.ime||'', d.tel||'', d.adresa||'',
-        d.proizvod||'', d.datum||'', d.termin||'',
-        d.status||'Novo', d.napomena||'', d.pdfName||''
-      ]));
-      const url = `${SHEETS_BASE}/${SHEET_ID}/values/${SHEET_NAME}?valueInputOption=RAW&key=${API_KEY}`;
-      // First clear, then write
-      await fetch(`${SHEETS_BASE}/${SHEET_ID}/values/${SHEET_NAME}:clear?key=${API_KEY}`, {method:'POST'});
-      const res = await fetch(url, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({range: SHEET_NAME, values})
-      });
-      const json = await res.json();
-      if (json.updatedRows) setSyncStatus('ok', 'Sinkronizirano');
+      const payload = deliveries.map(d => ({
+        id: d.id, ime: d.ime, tel: d.tel, adresa: d.adresa,
+        proizvod: d.proizvod, datum: d.datum, termin: d.termin,
+        status: d.status, napomena: d.napomena, pdfName: d.pdfName || ''
+      }));
+      const encoded = encodeURIComponent(JSON.stringify(payload));
+      const res = await fetch(APPS_SCRIPT_URL + '?action=save&data=' + encoded);
+      const text = await res.text();
+      const json = JSON.parse(text);
+      if (json && json.ok) setSyncStatus('ok', 'Sinkronizirano');
       else setSyncStatus('error', 'Greška pri snimanju');
     } catch(e) {
       setSyncStatus('error', 'Greška: ' + e.message);
