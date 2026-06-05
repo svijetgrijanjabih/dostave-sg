@@ -747,7 +747,7 @@
         status: d.status, napomena: d.napomena, pdfName: d.pdfName || ''
       }));
       const encoded = encodeURIComponent(JSON.stringify(payload));
-      await fetch(APPS_SCRIPT_URL + '?action=save&data=' + encoded, {
+      fetch(APPS_SCRIPT_URL + '?action=save&data=' + encoded, {
         method: 'GET',
         mode: 'no-cors'
       });
