@@ -700,44 +700,67 @@ div>
     syncTimeout = setTimeout(syncToSheet, 1200);
   }
 
-  function syncToSheet() {
-    setSyncStatus('syncing', 'Sinkronizacija...');
-    const payload = deliveries.map(d => ({
-      id: d.id, ime: d.ime, tel: d.tel, adresa: d.adresa,
-      proizvod: d.proizvod, datum: d.datum, termin: d.termin,
-      status: d.status, napomena: d.napomena, pdfName: d.pdfName || ''
-    }));
-    google.script.run
-      .withSuccessHandler(() => setSyncStatus('ok', 'Sinkronizirano'))
-      .withFailureHandler(e => setSyncStatus('error', 'Greška: ' + e.message))
-      .saveDeliveries(payload);
+  const API_KEY = 'AIzaSyAYx0yjk_5qJpG77BkRqC8-FIrhlyMjHjs';
+  const SHEET_ID = '1L-gdB-GEoErfmtL1vixC6Vft9IWGbeFiU5Sh3Tu-L_8';
+  const SHEET_NAME = 'Sheet1';
+  const SHEETS_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
+
+  async function loadFromSheet() {
+    setSyncStatus('syncing', 'Učitavanje...');
+    try {
+      const url = `${SHEETS_BASE}/${SHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      if (!json.values || json.values.length <= 1) {
+        render();
+        setSyncStatus('ok', 'Prazna baza');
+        return;
+      }
+      const headers = json.values[0];
+      const rows = json.values.slice(1).map(row => {
+        const obj = {};
+        headers.forEach((h, i) => { obj[h] = row[i] || ''; });
+        return obj;
+      }).filter(r => r.id);
+      deliveries = rows.map(r => ({
+        id: String(r.id), ime: r.ime||'', tel: r.tel||'',
+        adresa: r.adresa||'', proizvod: r.proizvod||'',
+        datum: r.datum||'', termin: r.termin||'',
+        status: r.status||'Novo', napomena: r.napomena||'',
+        pdfName: r.pdfName||'', pdfData: ''
+      }));
+      localStorage.setItem('sg_dostave_v2', JSON.stringify(deliveries));
+      render();
+      setSyncStatus('ok', 'Sinkronizirano · ' + deliveries.length + ' dostava');
+    } catch(e) {
+      render();
+      setSyncStatus('error', 'Greška: ' + e.message);
+    }
   }
 
-  function loadFromSheet() {
-    setSyncStatus('syncing', 'Učitavanje...');
-    google.script.run
-      .withSuccessHandler(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          deliveries = data.filter(r => r.id).map(r => ({
-            id: String(r.id), ime: r.ime||'', tel: r.tel||'',
-            adresa: r.adresa||'', proizvod: r.proizvod||'',
-            datum: r.datum||'', termin: r.termin||'',
-            status: r.status||'Novo', napomena: r.napomena||'',
-            pdfName: r.pdfName||'', pdfData: ''
-          }));
-          localStorage.setItem('sg_dostave_v2', JSON.stringify(deliveries));
-          render();
-          setSyncStatus('ok', 'Sinkronizirano · ' + deliveries.length + ' dostava');
-        } else {
-          render();
-          setSyncStatus('ok', 'Prazna baza');
-        }
-      })
-      .withFailureHandler(e => {
-        render();
-        setSyncStatus('error', 'Greška: ' + e.message);
-      })
-      .getDeliveries();
+  async function syncToSheet() {
+    setSyncStatus('syncing', 'Sinkronizacija...');
+    try {
+      const values = [['id','ime','tel','adresa','proizvod','datum','termin','status','napomena','pdfName']];
+      deliveries.forEach(d => values.push([
+        d.id||'', d.ime||'', d.tel||'', d.adresa||'',
+        d.proizvod||'', d.datum||'', d.termin||'',
+        d.status||'Novo', d.napomena||'', d.pdfName||''
+      ]));
+      const url = `${SHEETS_BASE}/${SHEET_ID}/values/${SHEET_NAME}?valueInputOption=RAW&key=${API_KEY}`;
+      // First clear, then write
+      await fetch(`${SHEETS_BASE}/${SHEET_ID}/values/${SHEET_NAME}:clear?key=${API_KEY}`, {method:'POST'});
+      const res = await fetch(url, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({range: SHEET_NAME, values})
+      });
+      const json = await res.json();
+      if (json.updatedRows) setSyncStatus('ok', 'Sinkronizirano');
+      else setSyncStatus('error', 'Greška pri snimanju');
+    } catch(e) {
+      setSyncStatus('error', 'Greška: ' + e.message);
+    }
   }
 
   function today() { return new Date().toISOString().slice(0,10); }
