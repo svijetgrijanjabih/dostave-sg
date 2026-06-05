@@ -1053,11 +1053,13 @@
 
     // Products - 4 digit code + name + quantity + KO
     const products = [];
-    const re = /\b\d{4}\s+([A-Za-z\u0160\u0110\u010c\u0106\u017d\u0161\u0111\u010d\u0107\u017e][A-Za-z\u0160\u0110\u010c\u0106\u017d\u0161\u0111\u010d\u0107\u017e0-9\s\/\-\.]{4,55}?)\s+[\d,]+\s+KO/g;
+    const re = /\b\d{4}\s+([A-Za-z\u0160\u0110\u010c\u0106\u017d\u0161\u0111\u010d\u0107\u017e][A-Za-z\u0160\u0110\u010c\u0106\u017d\u0161\u0111\u010d\u0107\u017e0-9\s\/\-\.]{4,55}?)\s+([\d,]+)\s+KO/g;
     let m;
     while ((m = re.exec(text)) !== null) {
       const name = m[1].trim().replace(/\s+/g, ' ');
-      if (name.length > 4) products.push(name);
+      const qty = parseFloat(m[2].replace(',', '.'));
+      const qtyStr = qty === Math.floor(qty) ? String(Math.floor(qty)) : String(qty);
+      if (name.length > 4) products.push(qtyStr + 'x ' + name);
     }
     if (products.length > 0 && !document.getElementById('f-proizvod').value) {
       document.getElementById('f-proizvod').value = products.join('\n');
