@@ -6,6 +6,7 @@
 <title>Dostave — Svijet Grijanja</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root {
     --bg: #0f0f0f;
@@ -626,7 +627,11 @@
         <textarea class="form-textarea" id="f-napomena" placeholder="Broj predračuna, instrukcije za dostavljača..."></textarea>
       </div>
       <div class="form-group">
-        <label class="form-label">PDF predračun</label>
+        <label class="form-label">Link predračuna (OneDrive)</label>
+        <input type="url" class="form-input" id="f-predracun-url" placeholder="https://onedrive.live.com/..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">PDF predračun (lokalno)</label>
         <div id="pdf-area">
           <label class="file-drop" for="f-pdf-input">
             <div class="file-drop-text">
@@ -732,7 +737,7 @@
         adresa: r.adresa||'', proizvod: r.proizvod||'',
         datum: r.datum||'', termin: r.termin||'',
         status: r.status||'Novo', napomena: r.napomena||'',
-        pdfName: r.pdfName||'', pdfData: ''
+        predracunUrl: r.predracunUrl||'', pdfName: r.pdfName||'', pdfData: ''
       }));
       localStorage.setItem('sg_dostave_v2', JSON.stringify(deliveries));
       render();
@@ -751,7 +756,8 @@
       const payload = deliveries.map(d => ({
         id: d.id, ime: d.ime, tel: d.tel, adresa: d.adresa,
         proizvod: d.proizvod, datum: d.datum, termin: d.termin,
-        status: d.status, napomena: d.napomena, pdfName: d.pdfName || ''
+        status: d.status, napomena: d.napomena,
+        predracunUrl: d.predracunUrl || '', pdfName: d.pdfName || ''
       }));
       const encoded = encodeURIComponent(JSON.stringify(payload));
       fetch(APPS_SCRIPT_URL + '?action=save&data=' + encoded, {
@@ -833,7 +839,7 @@
       ${d.proizvod ? `<div class="d-product">${SVG.pkg}<span>${d.proizvod.replace(/\n/g,'<br>')}</span></div>` : ''}
       ${d.datum ? `<div class="d-time">${SVG.clock} ${formatDate(d.datum)}${d.termin ? ' · ' + d.termin + 'h' : ''} · ${dayName(d.datum)}</div>` : ''}
       ${d.napomena ? `<div class="d-note">— ${d.napomena}</div>` : ''}
-      ${d.pdfName ? `<div class="d-pdf" onclick="openPDF('${d.id}')" style="cursor:pointer" title="Otvori predračun">${SVG.pdf} ${d.pdfName}</div>` : ''}
+      ${d.predracunUrl ? `<a href="${d.predracunUrl}" target="_blank" class="d-pdf" style="text-decoration:none">${SVG.pdf} Otvori predračun</a>` : d.pdfName ? `<div class="d-pdf" onclick="openPDF('${d.id}')" style="cursor:pointer">${SVG.pdf} ${d.pdfName}</div>` : ''}
       <div class="d-actions">
         <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')">${SVG.refresh} Status</button>
         <button class="btn btn-ghost btn-sm" onclick="editDelivery('${d.id}')">${SVG.edit} Uredi</button>
@@ -957,13 +963,14 @@
       document.getElementById('f-termin').value = d.termin || '';
       document.getElementById('f-status').value = d.status || 'Novo';
       document.getElementById('f-napomena').value = d.napomena || '';
+      document.getElementById('f-predracun-url').value = d.predracunUrl || '';
       if (d.pdfName) {
         pdfData = { name: d.pdfName, data: d.pdfData };
         showPDFAttached(d.pdfName);
       }
     } else {
       document.getElementById('modal-title').textContent = 'Nova dostava';
-      ['f-ime','f-tel','f-adresa','f-proizvod','f-datum','f-termin','f-napomena'].forEach(id => document.getElementById(id).value = '');
+      ['f-ime','f-tel','f-adresa','f-proizvod','f-datum','f-termin','f-napomena','f-predracun-url'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('f-status').value = 'Novo';
     }
     document.getElementById('modal-overlay').style.display = 'flex';
@@ -972,15 +979,97 @@
   function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
   function overlayClick(e) { if (e.target.id === 'modal-overlay') closeModal(); }
 
-  function handlePDF(e) {
+  async function handlePDF(e) {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = async ev => {
       pdfData = { name: file.name, data: ev.target.result };
       showPDFAttached(file.name);
+
+      // Parse PDF text
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const pdf = await pdfjsLib.getDocument({ data: ev.target.result.split(',')[1], encoding: 'binary' }).promise;
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const tc = await page.getTextContent();
+          fullText += tc.items.map(x => x.str).join(' ') + '
+';
+        }
+        autofillFromPDF(fullText);
+      } catch(err) {
+        console.log('PDF parse error:', err);
+      }
     };
     reader.readAsDataURL(file);
+  }
+
+  function autofillFromPDF(text) {
+    // Extract customer name - looks for "Kupac:" followed by name
+    const kupacMatch = text.match(/Kupac:\s*([A-ZŠĐČĆŽ][a-zšđčćž]+\s+[A-ZŠĐČĆŽ][a-zšđčćž]+)/);
+    if (kupacMatch && !document.getElementById('f-ime').value) {
+      document.getElementById('f-ime').value = kupacMatch[1].trim();
+    }
+
+    // Extract address - "Adresa za ispooruku:" or "Adresa za isporuku:"
+    const adresaMatch = text.match(/Adresa za is[p]+oruku:\s*([^\n\.]+)/i);
+    if (adresaMatch && !document.getElementById('f-adresa').value) {
+      document.getElementById('f-adresa').value = adresaMatch[1].trim();
+    }
+
+    // Extract phone - "Tel.:" or "Tel:"
+    const telMatch = text.match(/Tel\.?:\s*([0-9\s\/\+\-]{6,15})/i);
+    if (telMatch && !document.getElementById('f-tel').value) {
+      document.getElementById('f-tel').value = telMatch[1].trim();
+    }
+
+    // Extract delivery date - "isporučene na DD.M.YYYY"
+    const datumMatch = text.match(/isporucene na\s+(\d{1,2}\.\d{1,2}\.\d{4})/i) ||
+                       text.match(/isporu[cć]ene na\s+(\d{1,2}\.\d{1,2}\.\d{4})/i);
+    if (datumMatch && !document.getElementById('f-datum').value) {
+      const parts = datumMatch[1].split('.');
+      if (parts.length >= 3) {
+        const iso = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+        document.getElementById('f-datum').value = iso;
+      }
+    }
+
+    // Extract products - lines with article code pattern (4 digits) followed by name
+    const productLines = [];
+    const artRegex = /\b(\d{4})\s+([A-Za-zšđčćžŠĐČĆŽ][^\d]{5,50?})\s+[\d,]+\s+KO/g;
+    let match;
+    while ((match = artRegex.exec(text)) !== null) {
+      const name = match[2].trim().replace(/\s+/g, ' ');
+      if (name.length > 5) productLines.push(name);
+    }
+    if (productLines.length > 0 && !document.getElementById('f-proizvod').value) {
+      document.getElementById('f-proizvod').value = productLines.join('\n');
+    }
+
+    // Extract invoice number for napomena
+    const racunMatch = text.match(/Račun\s+(\d{2}-\d{4}-\d{6})/i);
+    if (racunMatch && !document.getElementById('f-napomena').value) {
+      document.getElementById('f-napomena').value = 'Račun: ' + racunMatch[1];
+    }
+
+    // Show toast notification
+    showToast('✓ Podaci izvučeni iz predračuna');
+  }
+
+  function showToast(msg) {
+    let t = document.getElementById('toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#4caf7d;color:white;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;transition:opacity 0.3s';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    setTimeout(() => t.style.opacity = '0', 3000);
   }
 
   function showPDFAttached(name) {
@@ -1026,6 +1115,7 @@
       termin: document.getElementById('f-termin').value,
       status: document.getElementById('f-status').value,
       napomena: document.getElementById('f-napomena').value.trim(),
+      predracunUrl: document.getElementById('f-predracun-url').value.trim(),
       pdfName: pdfData ? pdfData.name : '',
       pdfData: pdfData ? pdfData.data : '',
     };
