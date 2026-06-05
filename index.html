@@ -525,9 +525,8 @@
         </div>
         <select class="filter-sel" id="filter-status" onchange="render()">
           <option value="">Svi statusi</option>
-          <option>Novo</option>
-          <option>U toku</option>
-          <option>Isporučeno</option>
+          <option value="Novo">Aktivno</option>
+          <option value="Isporučeno">Isporučeno</option>
         </select>
         <input type="date" class="filter-date" id="filter-date" onchange="render()" title="Filter po datumu" />
         <select class="filter-sel" id="sort-select" onchange="render()">
@@ -607,9 +606,8 @@
       <div class="form-group">
         <label class="form-label">Status</label>
         <select class="form-select" id="f-status">
-          <option>Novo</option>
-          <option>U toku</option>
-          <option>Isporučeno</option>
+          <option value="Novo">Aktivno</option>
+          <option value="Isporučeno">Isporučeno</option>
         </select>
       </div>
     </div>
@@ -780,12 +778,13 @@
   }
 
   function badgeHTML(s) {
-    const cls = s === 'Novo' ? 'badge-novo' : s === 'U toku' ? 'badge-utoku' : 'badge-isporuceno';
-    return `<span class="badge ${cls}">${s}</span>`;
+    const cls = s === 'Isporučeno' ? 'badge-isporuceno' : 'badge-novo';
+    const label = s === 'Isporučeno' ? 'Isporučeno' : 'Aktivno';
+    return `<span class="badge ${cls}">${label}</span>`;
   }
 
   function nextStatus(s) {
-    return s === 'Novo' ? 'U toku' : s === 'U toku' ? 'Isporučeno' : 'Novo';
+    return s === 'Isporučeno' ? 'Novo' : 'Isporučeno';
   }
 
   function getFiltered() {
@@ -828,7 +827,7 @@
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;">
-          <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')" title="Promijeni status">${SVG.refresh}</button>
+          <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')" title="${d.status === 'Isporučeno' ? 'Označi kao Aktivno' : 'Označi kao Isporučeno'}">${SVG.refresh}</button>
           <button class="btn btn-ghost btn-sm" onclick="editDelivery('${d.id}')">${SVG.edit}</button>
           <button class="btn btn-danger btn-sm" onclick="askDelete('${d.id}')">${SVG.trash}</button>
         </div>
@@ -848,7 +847,7 @@
       ${d.napomena ? `<div class="d-note">— ${d.napomena}</div>` : ''}
       ${d.predracunUrl ? `<a href="${d.predracunUrl}" target="_blank" class="d-pdf" style="text-decoration:none">${SVG.pdf} Otvori predračun</a>` : d.pdfName ? `<div class="d-pdf" onclick="openPDF('${d.id}')" style="cursor:pointer">${SVG.pdf} ${d.pdfName}</div>` : ''}
       <div class="d-actions">
-        <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')">${SVG.refresh} Status</button>
+        <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')">${SVG.refresh} ${d.status === 'Isporučeno' ? 'Aktivno' : 'Isporuči'}</button>
         <button class="btn btn-ghost btn-sm" onclick="editDelivery('${d.id}')">${SVG.edit} Uredi</button>
         <button class="btn btn-danger btn-sm" onclick="askDelete('${d.id}')">${SVG.trash}</button>
       </div>
