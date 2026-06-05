@@ -1015,54 +1015,60 @@
   }
 
   function autofillFromText(text) {
-    console.log('Parsing text:', text.substring(0, 300));
+    console.log('Parsing text length:', text.length);
 
-    // Kupac name - appears after "Kupac:" section near bottom
-    const kupacMatch = text.match(/Kupac:\s*([A-ZŠĐČĆŽ][a-zšđčćž]+\s+[A-ZŠĐČĆŽ][a-zšđčćž]+(?:\s+[A-ZŠĐČĆŽ][a-zšđčćž]+)?)\s/);
-    if (kupacMatch && !document.getElementById('f-ime').value) {
-      document.getElementById('f-ime').value = kupacMatch[1].trim();
+    // Kupac name - after last "Kupac:" near bottom of doc
+    const kupacParts = text.split('Kupac:');
+    if (kupacParts.length > 1) {
+      const lastKupac = kupacParts[kupacParts.length - 1].trim();
+      const nameMatch = lastKupac.match(/^([A-Z\u0160\u0110\u010c\u0106\u017d][a-z\u0161\u0111\u010d\u0107\u017e]+\s+[A-Z\u0160\u0110\u010c\u0106\u017d][a-z\u0161\u0111\u010d\u0107\u017e]+(?:\s+[A-Z\u0160\u0110\u010c\u0106\u017d][a-z\u0161\u0111\u010d\u0107\u017e]+)?)/);
+      if (nameMatch && !document.getElementById('f-ime').value) {
+        document.getElementById('f-ime').value = nameMatch[1].trim();
+      }
     }
 
-    // Address - "Adresa za isporuku:"
-    const adresaMatch = text.match(/Adresa za isporuku:\s*([^
-]+?)(?:\s{2,}|Tel|$)/i);
-    if (adresaMatch && !document.getElementById('f-adresa').value) {
-      document.getElementById('f-adresa').value = adresaMatch[1].trim();
+    // Address - after "Adresa za isporuku:"
+    const adresaParts = text.split(/Adresa za isporuku:/i);
+    if (adresaParts.length > 1) {
+      const adresaText = adresaParts[1].trim();
+      const words = adresaText.split(/\s+/).slice(0, 5).join(' ');
+      if (words && !document.getElementById('f-adresa').value) {
+        document.getElementById('f-adresa').value = words;
+      }
     }
 
-    // Phone
-    const telMatch = text.match(/Tel\.?:\s*(0\d[\d\s]{6,12})/i);
+    // Phone - "Tel.:" or "Tel:"
+    const telMatch = text.match(/Tel\.?:\s*(0[\d\s]{8,12})/i);
     if (telMatch && !document.getElementById('f-tel').value) {
       document.getElementById('f-tel').value = telMatch[1].trim();
     }
 
     // Date - "isporucene na DD.M.YYYY"
-    const datumMatch = text.match(/isporu[cč]ene na\s+(\d{1,2}\.\d{1,2}\.\d{4})/i);
+    const datumMatch = text.match(/isporu[c\u010d]ene na\s+(\d{1,2}\.\d{1,2}\.\d{4})/i);
     if (datumMatch && !document.getElementById('f-datum').value) {
       const p = datumMatch[1].split('.');
       document.getElementById('f-datum').value = p[2] + '-' + p[1].padStart(2,'0') + '-' + p[0].padStart(2,'0');
     }
 
-    // Products - 4 digit code followed by name and KO
+    // Products - 4 digit code + name + quantity + KO
     const products = [];
-    const re = /(\d{4})\s+([A-Za-zšđčćžŠĐČĆŽ\/\-\.\s]{5,60?})\s+[\d,]+\s+KO/g;
+    const re = /\b\d{4}\s+([A-Za-z\u0160\u0110\u010c\u0106\u017d\u0161\u0111\u010d\u0107\u017e][A-Za-z\u0160\u0110\u010c\u0106\u017d\u0161\u0111\u010d\u0107\u017e0-9\s\/\-\.]{4,55}?)\s+[\d,]+\s+KO/g;
     let m;
     while ((m = re.exec(text)) !== null) {
-      const name = m[2].trim().replace(/\s+/g, ' ');
+      const name = m[1].trim().replace(/\s+/g, ' ');
       if (name.length > 4) products.push(name);
     }
     if (products.length > 0 && !document.getElementById('f-proizvod').value) {
-      document.getElementById('f-proizvod').value = products.join('
-');
+      document.getElementById('f-proizvod').value = products.join('\n');
     }
 
     // Invoice number
-    const racunMatch = text.match(/Ra[cč]un\s+(\d{2}-\d{4}-\d{6})/i);
+    const racunMatch = text.match(/Ra[c\u010d]un\s+(\d{2}-\d{4}-\d{6})/i);
     if (racunMatch && !document.getElementById('f-napomena').value) {
-      document.getElementById('f-napomena').value = 'Račun: ' + racunMatch[1];
+      document.getElementById('f-napomena').value = 'Ra\u010dun: ' + racunMatch[1];
     }
 
-    showToast('✓ Podaci izvučeni iz predračuna');
+    showToast('\u2713 Podaci izvu\u010deni iz prera\u010duna');
   }
 
   function showToast(msg) {
