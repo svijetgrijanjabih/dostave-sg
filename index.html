@@ -540,6 +540,12 @@
           <option>Isporučeno</option>
         </select>
         <input type="date" class="filter-date" id="filter-date" onchange="render()" title="Filter po datumu" />
+        <select class="filter-sel" id="sort-select" onchange="render()">
+          <option value="newest">Najnovije prvo</option>
+          <option value="datum-asc">Datum ↑</option>
+          <option value="datum-desc">Datum ↓</option>
+          <option value="ime">Ime A-Z</option>
+        </select>
         <button class="clear-btn" onclick="clearFilters()">Resetuj</button>
         <div class="view-toggle" style="margin-left:auto">
           <button class="view-btn active" id="vb-grid" onclick="setCardView('grid')" title="Kartice">
@@ -796,12 +802,18 @@
     const q = document.getElementById('search').value.toLowerCase();
     const fs = document.getElementById('filter-status').value || statusFilter;
     const fd = document.getElementById('filter-date').value;
-    return deliveries.filter(d => {
+    const filtered = deliveries.filter(d => {
       if (q && !`${d.ime} ${d.adresa} ${d.proizvod || ''}`.toLowerCase().includes(q)) return false;
       if (fs && d.status !== fs) return false;
       if (fd && d.datum !== fd) return false;
       return true;
-    }).sort((a,b) => (a.datum||'') > (b.datum||'') ? 1 : -1);
+    });
+    const sort = document.getElementById('sort-select') ? document.getElementById('sort-select').value : 'newest';
+    if (sort === 'datum-asc') filtered.sort((a,b) => (a.datum||'') > (b.datum||'') ? 1 : -1);
+    else if (sort === 'datum-desc') filtered.sort((a,b) => (a.datum||'') < (b.datum||'') ? 1 : -1);
+    else if (sort === 'ime') filtered.sort((a,b) => (a.ime||'').localeCompare(b.ime||'', 'hr'));
+    // default 'newest' = original insertion order (deliveries array order, newest first via unshift)
+    return filtered;
   }
 
   function cardHTML(d, listMode) {
@@ -943,6 +955,7 @@
     document.getElementById('search').value = '';
     document.getElementById('filter-status').value = '';
     document.getElementById('filter-date').value = '';
+    document.getElementById('sort-select').value = 'newest';
     statusFilter = '';
     render();
   }
