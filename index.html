@@ -6,7 +6,7 @@
 <title>Dostave — Svijet Grijanja</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
 <style>
   :root {
     --bg: #0f0f0f;
@@ -982,83 +982,89 @@
   async function handlePDF(e) {
     const file = e.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = async ev => {
       pdfData = { name: file.name, data: ev.target.result };
       showPDFAttached(file.name);
-
-      // Parse PDF text
-      try {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const base64 = ev.target.result.split(',')[1];
-        const binary = atob(base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
-        let fullText = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const tc = await page.getTextContent();
-          fullText += tc.items.map(x => x.str).join(' ') + '\n';
-        }
-        autofillFromPDF(fullText);
-      } catch(err) {
-        console.log('PDF parse error:', err);
-      }
+      parsePDFWithClaude(ev.target.result, file.name);
     };
     reader.readAsDataURL(file);
   }
 
-  function autofillFromPDF(text) {
-    // Extract customer name
-    const kupacMatch = text.match(/Kupac:\s*([A-ZŠĐČĆŽ][a-zšđčćž]+\s+[A-ZŠĐČĆŽ][a-zšđčćž]+)/);
+  async function parsePDFWithClaude(base64data, filename) {
+    showToast('⏳ Čitam predračun...');
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+      const base64 = base64data.split(',')[1];
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+      let fullText = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const tc = await page.getTextContent();
+        fullText += tc.items.map(x => x.str).join(' ') + ' ';
+      }
+      console.log('PDF text extracted, length:', fullText.length);
+      autofillFromText(fullText);
+    } catch(err) {
+      console.log('PDF parse error:', err);
+      showToast('⚠ Nije moguće čitati predračun');
+    }
+  }
+
+  function autofillFromText(text) {
+    console.log('Parsing text:', text.substring(0, 300));
+
+    // Kupac name - appears after "Kupac:" section near bottom
+    const kupacMatch = text.match(/Kupac:\s*([A-ZŠĐČĆŽ][a-zšđčćž]+\s+[A-ZŠĐČĆŽ][a-zšđčćž]+(?:\s+[A-ZŠĐČĆŽ][a-zšđčćž]+)?)\s/);
     if (kupacMatch && !document.getElementById('f-ime').value) {
       document.getElementById('f-ime').value = kupacMatch[1].trim();
     }
 
-    // Extract address
-    const adresaMatch = text.match(/Adresa za isp[o]+roku:\s*([^\n\.]+)/i);
+    // Address - "Adresa za isporuku:"
+    const adresaMatch = text.match(/Adresa za isporuku:\s*([^
+]+?)(?:\s{2,}|Tel|$)/i);
     if (adresaMatch && !document.getElementById('f-adresa').value) {
       document.getElementById('f-adresa').value = adresaMatch[1].trim();
     }
 
-    // Extract phone
-    const telMatch = text.match(/Tel\.?:\s*([0-9\s\/\+\-]{6,15})/i);
+    // Phone
+    const telMatch = text.match(/Tel\.?:\s*(0\d[\d\s]{6,12})/i);
     if (telMatch && !document.getElementById('f-tel').value) {
       document.getElementById('f-tel').value = telMatch[1].trim();
     }
 
-    // Extract delivery date
+    // Date - "isporucene na DD.M.YYYY"
     const datumMatch = text.match(/isporu[cč]ene na\s+(\d{1,2}\.\d{1,2}\.\d{4})/i);
     if (datumMatch && !document.getElementById('f-datum').value) {
-      const parts = datumMatch[1].split('.');
-      if (parts.length >= 3) {
-        const iso = parts[2] + '-' + parts[1].padStart(2,'0') + '-' + parts[0].padStart(2,'0');
-        document.getElementById('f-datum').value = iso;
-      }
+      const p = datumMatch[1].split('.');
+      document.getElementById('f-datum').value = p[2] + '-' + p[1].padStart(2,'0') + '-' + p[0].padStart(2,'0');
     }
 
-    // Extract products - lines with 4-digit article code
-    const productLines = [];
-    const artRegex = /\b(\d{4})\s+([A-Za-zŠĐČĆŽšđčćž][^\d]{5,60?})\s+[\d,]+\s+KO/g;
+    // Products - 4 digit code followed by name and KO
+    const products = [];
+    const re = /(\d{4})\s+([A-Za-zšđčćžŠĐČĆŽ\/\-\.\s]{5,60?})\s+[\d,]+\s+KO/g;
     let m;
-    while ((m = artRegex.exec(text)) !== null) {
+    while ((m = re.exec(text)) !== null) {
       const name = m[2].trim().replace(/\s+/g, ' ');
-      if (name.length > 5) productLines.push(name);
+      if (name.length > 4) products.push(name);
     }
-    if (productLines.length > 0 && !document.getElementById('f-proizvod').value) {
-      document.getElementById('f-proizvod').value = productLines.join('\n');
+    if (products.length > 0 && !document.getElementById('f-proizvod').value) {
+      document.getElementById('f-proizvod').value = products.join('
+');
     }
 
-    // Extract invoice number
+    // Invoice number
     const racunMatch = text.match(/Ra[cč]un\s+(\d{2}-\d{4}-\d{6})/i);
     if (racunMatch && !document.getElementById('f-napomena').value) {
       document.getElementById('f-napomena').value = 'Račun: ' + racunMatch[1];
     }
 
-    showToast('✓ Podaci izvučeni iz preračuna');
+    showToast('✓ Podaci izvučeni iz predračuna');
   }
+
   function showToast(msg) {
     let t = document.getElementById('toast');
     if (!t) {
