@@ -820,8 +820,9 @@
 
   function cardHTML(d, listMode) {
     const cls = listMode ? 'd-card list-view' : 'd-card';
+    const did = d.id;
     if (listMode) {
-      return `<div class="${cls}">
+      return `<div class="${cls}" data-id="${did}">
         <div>
           <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span class="d-name">${d.ime}</span>
@@ -835,13 +836,13 @@
           </div>
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0;">
-          <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')" title="${d.status === 'Isporučeno' ? 'Označi kao Aktivno' : 'Označi kao Isporučeno'}">${SVG.refresh}</button>
-          <button class="btn btn-ghost btn-sm" onclick="editDelivery('${d.id}')">${SVG.edit}</button>
-          <button class="btn btn-danger btn-sm" onclick="askDelete('${d.id}')">${SVG.trash}</button>
+          <button class="btn btn-ghost btn-sm card-status-btn" data-id="${did}" title="${d.status === 'Isporučeno' ? 'Označi kao Aktivno' : 'Označi kao Isporučeno'}">${SVG.refresh}</button>
+          <button class="btn btn-ghost btn-sm card-edit-btn" data-id="${did}">${SVG.edit}</button>
+          <button class="btn btn-danger btn-sm card-delete-btn" data-id="${did}">${SVG.trash}</button>
         </div>
       </div>`;
     }
-    return `<div class="${cls}">
+    return `<div class="${cls}" data-id="${did}">
       <div class="d-card-top">
         <div>
           <div class="d-name">${d.ime}</div>
@@ -853,11 +854,11 @@
       ${d.proizvod ? `<div class="d-product">${SVG.pkg}<span>${d.proizvod.replace(/\n/g,'<br>')}</span></div>` : ''}
       ${d.datum ? `<div class="d-time">${SVG.clock} ${formatDate(d.datum)}${d.termin ? ' · ' + d.termin + 'h' : ''} · ${dayName(d.datum)}</div>` : ''}
       ${d.napomena ? `<div class="d-note">— ${d.napomena}</div>` : ''}
-      ${d.predracunUrl ? `<a href="${d.predracunUrl}" target="_blank" class="d-pdf" style="text-decoration:none">${SVG.pdf} Otvori predračun</a>` : d.pdfName ? `<div class="d-pdf" onclick="openPDF('${d.id}')" style="cursor:pointer">${SVG.pdf} ${d.pdfName}</div>` : ''}
+      ${d.predracunUrl ? `<a href="${d.predracunUrl}" target="_blank" class="d-pdf" style="text-decoration:none">${SVG.pdf} Otvori predračun</a>` : d.pdfName ? `<div class="d-pdf card-pdf-btn" data-id="${did}" style="cursor:pointer">${SVG.pdf} ${d.pdfName}</div>` : ''}
       <div class="d-actions">
-        <button class="btn btn-ghost btn-sm" onclick="changeStatus('${d.id}')">${SVG.refresh} ${d.status === 'Isporučeno' ? 'Aktivno' : 'Isporuči'}</button>
-        <button class="btn btn-ghost btn-sm" onclick="editDelivery('${d.id}')">${SVG.edit} Uredi</button>
-        <button class="btn btn-danger btn-sm" onclick="askDelete('${d.id}')">${SVG.trash}</button>
+        <button class="btn btn-ghost btn-sm card-status-btn" data-id="${did}">${SVG.refresh} ${d.status === 'Isporučeno' ? 'Aktivno' : 'Isporuči'}</button>
+        <button class="btn btn-ghost btn-sm card-edit-btn" data-id="${did}">${SVG.edit} Uredi</button>
+        <button class="btn btn-danger btn-sm card-delete-btn" data-id="${did}">${SVG.trash}</button>
       </div>
     </div>`;
   }
@@ -894,6 +895,7 @@
     if (currentView === 'lista') {
       const wrapCls = isListMode ? 'd-list' : 'd-grid';
       cont.innerHTML = `<div class="${wrapCls}">${list.map(d => cardHTML(d, isListMode)).join('')}</div>`;
+      attachCardListeners(cont);
     } else {
       const groups = {};
       list.forEach(d => {
